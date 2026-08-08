@@ -136,7 +136,7 @@ def dfs_visualize(root, total_steps):
     """
     Depth-First Search (DFS).
 
-    Uses a stack instead of recursion.
+    Uses a stack to explore nodes as deep as possible before backtracking.
     """
 
     visited = set()
@@ -171,8 +171,7 @@ def dfs_visualize(root, total_steps):
 def bfs_visualize(root, total_steps):
     """
     Breadth-First Search (BFS).
-
-    Uses a queue instead of recursion.
+    Uses a queue to explore nodes level by level.
     """
 
     visited = set()
