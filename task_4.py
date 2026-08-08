@@ -72,8 +72,6 @@ if __name__ == '__main__':
     heap_list = [1, 3, 5, 7, 9, 2]
     
     heapq.heapify(heap_list)
-    print(type(heap_list))
-    print(heap_list)
     # Побудова дерева з купи
     heap_tree_root = build_heap_tree(heap_list)
 
