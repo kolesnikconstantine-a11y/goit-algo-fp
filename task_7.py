@@ -2,52 +2,94 @@ import random
 import matplotlib.pyplot as plt
 
 
-def simulate_dice_rolls(num_rolls):
-    # Словник для підрахунку кількості випадань кожної суми від 2 до 12
-    counts = {s: 0 for s in range(2, 13)}
+NUM_SIDES = 6
+MIN_SUM = 2
+MAX_SUM = 12
 
-    # Симуляція кидків
+
+def simulate_dice_rolls(num_rolls):
+    """Simulate rolling two dice and calculate probabilities for each sum."""
+
+    if num_rolls <= 0:
+        raise ValueError("Number of rolls must be greater than zero.")
+
+    counts = {dice_sum: 0 for dice_sum in range(MIN_SUM, MAX_SUM + 1)}
+
+    # Generate random dice rolls and count each possible sum.
     for _ in range(num_rolls):
-        die1 = random.randint(1, 6)
-        die2 = random.randint(1, 6)
+        die1 = random.randint(1, NUM_SIDES)
+        die2 = random.randint(1, NUM_SIDES)
+
         dice_sum = die1 + die2
         counts[dice_sum] += 1
 
-    # Обрахування ймовірності випаду кожної суми
-    probabilities = {s: counts[s] / num_rolls for s in counts}
+    # Convert occurrence counts into probabilities.
+    return {
+        dice_sum: count / num_rolls
+        for dice_sum, count in counts.items()
+    }
 
-    return probabilities
+
+def print_results(probabilities, num_rolls):
+    """Print simulation results as a formatted table."""
+
+    print(f"\n--- Simulation for {num_rolls:,} rolls ---")
+    print(f"{'Sum':<6} | {'Monte Carlo (%)':<18}")
+    print("-" * 27)
+
+    for dice_sum, probability in probabilities.items():
+        print(f"{dice_sum:<6} | {probability * 100:.2f}%")
 
 
-def plot_probabilities(probabilities):
+def plot_probabilities(probabilities, num_rolls):
+    """Display probabilities of dice sums as a bar chart."""
+
     sums = list(probabilities.keys())
-    probs = list(probabilities.values())
+    probabilities_values = list(probabilities.values())
 
-    # Створення графіка
     plt.figure(figsize=(10, 6))
-    plt.bar(sums, probs, tick_label=sums, color='skyblue', edgecolor='black')
-    plt.xlabel('Сума чисел на кубиках')
-    plt.ylabel('Ймовірність')
-    plt.title('Ймовірність суми чисел на двох кубиках (Метод Монте-Карло)')
 
-    # Додавання відсотків випадання на графік
-    for i, prob in enumerate(probs):
-        plt.text(sums[i], prob + 0.002, f"{prob*100:.2f}%", ha='center', fontsize=9)
+    bars = plt.bar(
+        sums,
+        probabilities_values,
+        edgecolor="black"
+    )
 
-    plt.ylim(0, max(probs) + 0.03)
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel("Sum of two dice")
+    plt.ylabel("Probability")
+    plt.title(
+        f"Probability of Dice Sums "
+        f"(Monte Carlo, {num_rolls:,} rolls)"
+    )
+
+    # Display probability values above each bar.
+    for bar, probability in zip(bars, probabilities_values):
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.002,
+            f"{probability * 100:.2f}%",
+            ha="center",
+            fontsize=9
+        )
+
+    plt.xticks(sums)
+    plt.ylim(0, max(probabilities_values) + 0.03)
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.tight_layout()
     plt.show()
 
 
-if __name__ == "__main__":
-    for accuracy in [100, 1000, 10000, 100000]:
-        print(f"\n--- Симуляція для {accuracy:,} кидків ---")
-        probabilities = simulate_dice_rolls(accuracy)
+def run_simulations():
+    """Run simulations with different numbers of dice rolls."""
 
-        # Вивід результатів у консоль у вигляді таблиці
-        print(f"{'Сума':<6} | {'Монте-Карло (%)':<18}")
-        print("-" * 27)
-        for s, p in probabilities.items():
-            print(f"{s:<6} | {p * 100:.2f}%")
-        # Візуалізація результатів
-        plot_probabilities(probabilities)
+    roll_counts = [100, 1_000, 10_000, 100_000]
+
+    for num_rolls in roll_counts:
+        probabilities = simulate_dice_rolls(num_rolls)
+
+        print_results(probabilities, num_rolls)
+        plot_probabilities(probabilities, num_rolls)
+
+
+if __name__ == "__main__":
+    run_simulations()
