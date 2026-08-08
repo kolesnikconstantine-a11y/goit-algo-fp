@@ -50,5 +50,4 @@ if __name__ == "__main__":
         for s, p in probabilities.items():
             print(f"{s:<6} | {p * 100:.2f}%")
 
-        # Відображення ймовірностей на графіку
         plot_probabilities(probabilities)
