@@ -49,5 +49,5 @@ if __name__ == "__main__":
         print("-" * 27)
         for s, p in probabilities.items():
             print(f"{s:<6} | {p * 100:.2f}%")
-
+        # Візуалізація результатів
         plot_probabilities(probabilities)
