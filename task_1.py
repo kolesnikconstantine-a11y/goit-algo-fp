@@ -1,154 +1,209 @@
+from typing import Optional
+
+
 class Node:
-    """Вузол однозв'язного списку."""
+    """Node of a singly linked list."""
 
     def __init__(self, data=None):
         self.data = data
-        self.next = None
+        self.next: Optional["Node"] = None
 
 
 class LinkedList:
-    """Однозв'язний список."""
+    """Singly linked list."""
 
     def __init__(self):
-        self.head = None
+        self.head: Optional[Node] = None
 
-    def insert_at_beginning(self, data):
-        """Вставка елемента на початок списку."""
+    def insert_at_beginning(self, data) -> None:
+        """Insert a new node at the beginning of the list."""
         new_node = Node(data)
         new_node.next = self.head
         self.head = new_node
 
-    def insert_at_end(self, data):
-        """Вставка елемента в кінець списку."""
+    def insert_at_end(self, data) -> None:
+        """Insert a new node at the end of the list."""
         new_node = Node(data)
-        if not self.head:
+
+        if self.head is None:
             self.head = new_node
             return
-        cur = self.head
-        while cur.next:
-            cur = cur.next
-        cur.next = new_node
 
-    def print_list(self):
-        """Вивід елементів списку."""
+        current = self.head
+
+        while current.next is not None:
+            current = current.next
+
+        current.next = new_node
+
+    def print_list(self) -> None:
+        """Print all elements of the list."""
         elements = []
-        cur = self.head
-        while cur:
-            elements.append(str(cur.data))
-            cur = cur.next
+        current = self.head
+
+        while current is not None:
+            elements.append(str(current.data))
+            current = current.next
+
         print(" -> ".join(elements) if elements else "Empty list")
 
 
 def reverse_linked_list(linked_list: LinkedList) -> None:
-    """Реверсує однозв'язний список in-place, змінюючи вказівники вузлів."""
-    prev = None
+    """
+    Reverse the linked list in-place by changing node pointers.
+    """
+    previous = None
     current = linked_list.head
 
     while current is not None:
-        next_node = current.next  # Зберігаємо наступний вузол
-        current.next = prev  # Змінюємо напрямок вказівника
-        prev = current  # Зсуваємо prev на поточний вузол
-        current = next_node  # Переходимо до наступного вузла
+        next_node = current.next
 
-    linked_list.head = prev  # Оновлюємо голову списку
+        # Reverse the current node's pointer
+        current.next = previous
+
+        # Move pointers one position forward
+        previous = current
+        current = next_node
+
+    # Update the head to the new first node
+    linked_list.head = previous
 
 
-def _split_list(head: Node):
-    """Допоміжна функція: розділяє список на дві половини за допомогою методу швидкого та повільного вказівників (Fast & Slow Pointers)."""
+def split_list(head: Optional[Node]) -> tuple[Optional[Node], Optional[Node]]:
+    """
+    Split the linked list into two halves using
+    the fast and slow pointer technique.
+    """
+    if head is None or head.next is None:
+        return head, None
+
     slow = head
     fast = head.next
 
-    while fast and fast.next:
+    # Move slow by one step and fast by two steps
+    while fast is not None and fast.next is not None:
         slow = slow.next
         fast = fast.next.next
 
     middle = slow.next
-    slow.next = None  # Розриваємо список на дві частини
+    slow.next = None
+
     return head, middle
 
 
-def _merge_nodes(left: Node, right: Node) -> Node:
-    """Допоміжна функція: зливає два відсортовані списки вузлів у один."""
+def merge_nodes(
+    left: Optional[Node],
+    right: Optional[Node]
+) -> Optional[Node]:
+    """
+    Merge two sorted linked lists into one sorted list.
+    """
     dummy = Node()
     tail = dummy
 
-    while left and right:
+    while left is not None and right is not None:
         if left.data <= right.data:
             tail.next = left
             left = left.next
         else:
             tail.next = right
             right = right.next
+
         tail = tail.next
 
-    tail.next = left if left else right
+    # Attach the remaining nodes
+    tail.next = left if left is not None else right
+
     return dummy.next
 
 
-def merge_sort_nodes(head: Node) -> Node:
-    """Рекурсивна функція сортування злиттям для вузлів."""
+def merge_sort_nodes(head: Optional[Node]) -> Optional[Node]:
+    """
+    Recursively sort linked list nodes using Merge Sort.
+    """
     if head is None or head.next is None:
         return head
 
-    left_half, right_half = _split_list(head)
+    # Split the list into two halves
+    left, right = split_list(head)
 
-    left_sorted = merge_sort_nodes(left_half)
-    right_sorted = merge_sort_nodes(right_half)
+    # Recursively sort both halves
+    left = merge_sort_nodes(left)
+    right = merge_sort_nodes(right)
 
-    return _merge_nodes(left_sorted, right_sorted)
+    # Merge the sorted halves
+    return merge_nodes(left, right)
 
 
 def sort_linked_list(linked_list: LinkedList) -> None:
-    """Публічна функція для сортування LinkedList за допомогою Merge Sort."""
+    """Sort a LinkedList using the Merge Sort algorithm."""
     linked_list.head = merge_sort_nodes(linked_list.head)
 
 
-def merge_two_sorted_lists(list1: LinkedList, list2: LinkedList) -> LinkedList:
-    """Приймає два відсортовані списки і повертає новий відсортований LinkedList."""
+def merge_two_sorted_lists(
+    list1: LinkedList,
+    list2: LinkedList
+) -> LinkedList:
+    """
+    Merge two sorted linked lists into a new LinkedList.
+    """
     merged_list = LinkedList()
-    merged_list.head = _merge_nodes(list1.head, list2.head)
+    merged_list.head = merge_nodes(list1.head, list2.head)
+
     return merged_list
 
 
+def create_list(values: list) -> LinkedList:
+    """Create a linked list from a list of values."""
+    linked_list = LinkedList()
+
+    for value in values:
+        linked_list.insert_at_end(value)
+
+    return linked_list
+
+
 if __name__ == "__main__":
-    print("--- 1. Реверсування ---")
-    llist = LinkedList()
-    for val in [10, 20, 30, 40, 50]:
-        llist.insert_at_end(val)
 
-    print("Початковий список:")
-    llist.print_list()
+    # 1. Reverse a linked list
+    print("--- 1. Reversing ---")
 
-    reverse_linked_list(llist)
-    print("Реверсований список:")
-    llist.print_list()
+    linked_list = create_list([10, 20, 30, 40, 50])
 
-    print("\n--- 2. Сортування (Merge Sort) ---")
-    unsorted_llist = LinkedList()
-    for val in [4, 1, 5, 3, 2, 9, 6]:
-        unsorted_llist.insert_at_end(val)
+    print("Original list:")
+    linked_list.print_list()
 
-    print("Невідсортований список:")
-    unsorted_llist.print_list()
+    reverse_linked_list(linked_list)
 
-    sort_linked_list(unsorted_llist)
-    print("Відсортований список:")
-    unsorted_llist.print_list()
+    print("Reversed list:")
+    linked_list.print_list()
 
-    print("\n--- 3. Об'єднання двох відсортованих списків ---")
-    list_a = LinkedList()
-    for val in [2, 3, 7, 9]:
-        list_a.insert_at_end(val)
+    # 2. Sort a linked list using Merge Sort
+    print("\n--- 2. Sorting with Merge Sort ---")
 
-    list_b = LinkedList()
-    for val in [1, 4, 5, 8, 10]:
-        list_b.insert_at_end(val)
+    unsorted_list = create_list([4, 1, 5, 3, 2, 9, 6])
 
-    print("Список A:")
+    print("Unsorted list:")
+    unsorted_list.print_list()
+
+    sort_linked_list(unsorted_list)
+
+    print("Sorted list:")
+    unsorted_list.print_list()
+
+    # 3. Merge two sorted linked lists
+    print("\n--- 3. Merging Two Sorted Lists ---")
+
+    list_a = create_list([2, 3, 7, 9])
+    list_b = create_list([1, 4, 5, 8, 10])
+
+    print("List A:")
     list_a.print_list()
-    print("Список B:")
+
+    print("List B:")
     list_b.print_list()
 
     merged = merge_two_sorted_lists(list_a, list_b)
-    print("Об'єднаний відсортований список:")
+
+    print("Merged sorted list:")
     merged.print_list()
